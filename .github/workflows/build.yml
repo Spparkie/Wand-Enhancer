@@ -7,7 +7,7 @@ on:
         description: Include GitHub release checks when Wand starts
         type: boolean
         required: false
-        default: false
+        default: true
   pull_request:
   push:
     branches: [master, 'feature/rc_*']
