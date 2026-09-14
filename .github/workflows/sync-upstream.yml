@@ -2,7 +2,7 @@ name: Sync Upstream Repository
 
 on:
   schedule:
-    # Executa diariamente às 2:00 UTC (ajuste conforme necessário)
+    # Executa diariamente às 2:00 UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
 
@@ -26,8 +26,7 @@ jobs:
 
       - name: Add upstream remote
         run: |
-          # ⚠️ AJUSTE ESTE URL PARA O REPOSITÓRIO ORIGINAL CORRETO
-          git remote add upstream https://github.com/original-owner/original-repo.git
+          git remote add upstream https://github.com/k1tbyte/Wand-Enhancer.git
           git fetch upstream master
 
       - name: Merge upstream changes
@@ -37,17 +36,21 @@ jobs:
 
       - name: Restore build.yml customization
         run: |
-          # Resolve conflitos mantendo nossa versão
+          # Resolve conflitos no build.yml mantendo nossa versão
           if git diff --name-only --diff-filter=U | grep -q ".github/workflows/build.yml"; then
             git checkout --ours .github/workflows/build.yml
             git add .github/workflows/build.yml
           fi
 
-          # Garante que default: true no enable_update_notifications
+          # Garante que enable_update_notifications.default = true
           if [ -f ".github/workflows/build.yml" ]; then
             sed -i 's/default: false/default: true/' .github/workflows/build.yml
-            git add .github/workflows/build.yml
-            git commit -m "Maintain build.yml customization: enable_update_notifications.default = true" || true
+            
+            # Verifica se houve mudança e faz commit se necessário
+            if ! git diff --quiet .github/workflows/build.yml; then
+              git add .github/workflows/build.yml
+              git commit -m "Maintain build.yml customization: enable_update_notifications.default = true" || true
+            fi
           fi
 
       - name: Push changes
@@ -60,11 +63,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Sync with upstream repository"
-          title: "Sync upstream changes into fork"
+          title: "Sync: Upstream changes from k1tbyte/Wand-Enhancer"
           body: |
             ## Sincronização com repositório upstream
             
-            Esta PR sincroniza as alterações mais recentes do repositório original.
+            Esta PR sincroniza as alterações mais recentes do repositório original (k1tbyte/Wand-Enhancer).
             
             ### Customização mantida:
             - `build.yml`: `enable_update_notifications.default = true`
